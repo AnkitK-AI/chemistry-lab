@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AR Lesson – Solar System</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+body{margin:0;background:#05060f;color:#f1f3ff;font-family:system-ui,sans-serif}
+model-viewer{width:100%;height:68vh;background:radial-gradient(#1b2150,#05060f)}
+.ar-btn{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:#ffb703;color:#111;border:0;border-radius:24px;padding:12px 22px;font-size:16px;font-weight:bold}
+.hs{background:#ffb703;color:#111;border:0;border-radius:12px;padding:4px 10px;font-size:12px}
+.bar{display:flex;gap:6px;overflow-x:auto;padding:10px}
+.bar button,.say{background:#14183a;color:#f1f3ff;border:1px solid #3a4180;border-radius:20px;padding:8px 14px;flex:none}
+.bar button.on{background:#ffb703;color:#111}
+.info{padding:0 14px 14px}.info h2{margin:4px 0}.info p{line-height:1.5}
+</style></head><body>
+
+<model-viewer id="mv" src="models/solar_system.glb"
+  alt="3D model" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="auto"
+  camera-controls auto-rotate shadow-intensity="1" touch-action="pan-y" interaction-prompt="auto">
+  <button slot="ar-button" class="ar-btn">📱 View in your room (AR)</button>
+  </model-viewer>
+
+<div class="bar" id="bar"></div>
+<div class="info"><h2 id="nm"></h2><p id="tx"></p><button class="say" id="say">▶ Narrate</button></div>
+
+<script>
+// Replace "src" with your own .glb files (put them in a /models folder next to this page)
+const LESSON=[
+ {n:"Solar System",src:"models/solar_system.glb",t:"Our solar system has one star, the Sun, and eight planets. Rocky planets are close to the Sun, and giant planets are far away. Sizes here are not to scale, so use pinch to zoom and look closely."},
+ {n:"Sun",src:"models/sun.glb",t:"The Sun is a star at the centre of our solar system. It gives us light and heat. All the planets move around the Sun in fixed paths called orbits."},
+ {n:"Mercury",src:"models/mercury.glb",t:"Mercury is the planet closest to the Sun. It is the smallest planet and completes one orbit in just eighty eight days."},
+ {n:"Venus",src:"models/venus.glb",t:"Venus is the brightest planet in our night sky. Thick clouds trap heat, which makes it the hottest planet."},
+ {n:"Earth",src:"models/earth.glb",t:"Earth is the only planet known to have life. It has air, water and the right temperature. Earth takes three hundred sixty five days to go around the Sun."},
+ {n:"Mars",src:"models/mars.glb",t:"Mars is called the red planet because its soil contains iron oxide. It has two small moons named Phobos and Deimos."},
+ {n:"Jupiter",src:"models/jupiter.glb",t:"Jupiter is the largest planet in the solar system. Its stripes are bands of clouds, and a giant storm has lasted for hundreds of years."},
+ {n:"Saturn",src:"models/saturn.glb",t:"Saturn is famous for its beautiful rings made of ice and rock. It is so light that it could float on water."},
+ {n:"Uranus",src:"models/uranus.glb",t:"Uranus is an ice giant that spins on its side. It takes eighty four years to orbit the Sun."},
+ {n:"Neptune",src:"models/neptune.glb",t:"Neptune is the farthest planet from the Sun. It is cold, dark and has the fastest winds in the solar system."}
+];
+const mv=document.getElementById("mv"),bar=document.getElementById("bar");
+function show(i){const p=LESSON[i];mv.src=p.src;nm.textContent=p.n;tx.textContent=p.t;
+ [...bar.children].forEach((b,k)=>b.classList.toggle("on",k==i));cur=i;speak()}
+let cur=0;
+function speak(){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(LESSON[cur].t);u.rate=.9;speechSynthesis.speak(u)}
+LESSON.forEach((p,i)=>{const b=document.createElement("button");b.textContent=p.n;b.onclick=()=>show(i);bar.append(b)});
+say.onclick=speak;
+// Support links like ar.html?p=1 (from QR code or main page)
+const q=+new URLSearchParams(location.search).get("p")||0;
+nm.textContent=LESSON[q].n;tx.textContent=LESSON[q].t;cur=q;mv.src=LESSON[q].src;bar.children[q].classList.add("on");
+</script></body></html>
