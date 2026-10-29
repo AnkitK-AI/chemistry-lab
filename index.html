@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <title>EdTech AR Startup - Chemistry Lab Sample</title>
     <meta name="description" content="Interactive AR Chemistry Lesson">
-    <!-- Import Free Open-Source A-Frame VR/AR Engine -->
+    <!-- 1. Load A-Frame Engine First -->
     <script src="https://aframe.io"></script>
-    <!-- Import A-Frame Particle System Library for the bubbling effect -->
+    <!-- 2. Load Particle System Second -->
     <script src="https://unpkg.com"></script>
-    
-    <!-- Custom Interaction Script -->
+  </head>
+  <body>
+    <!-- 3. Your interaction logic runs safely here after libraries are defined -->
     <script>
       AFRAME.registerComponent('chemical-interaction', {
         init: function () {
@@ -20,33 +21,25 @@
           
           el.addEventListener('click', function () {
             if (el.id === 'acid-bottle-model') {
-              // Action: Add Acid
-              liquid.setAttribute('material', 'color', '#ff3333'); // Turns liquid bright red
-              bubbles.setAttribute('visible', 'true'); // Show bubbling particles
+              liquid.setAttribute('material', 'color', '#ff3333');
+              bubbles.setAttribute('visible', 'true');
               textPanel.setAttribute('value', 'Reaction: Acid Added!\n\nIndicator turns RED.\nPH level drops below 7.\nHCl + H2O -> H3O+ + Cl-');
-              
-              // Animate the bottle tilting slightly to simulate pouring
               el.setAttribute('animation', 'property: rotation; to: 0 0 30; dur: 300; dir: alternate; loop: 1');
             } else if (el.id === 'base-bottle-model') {
-              // Action: Add Base
-              liquid.setAttribute('material', 'color', '#3333ff'); // Turns liquid bright blue
-              bubbles.setAttribute('visible', 'true'); // Show bubbling particles
+              liquid.setAttribute('material', 'color', '#3333ff');
+              bubbles.setAttribute('visible', 'true');
               textPanel.setAttribute('value', 'Reaction: Base Added!\n\nIndicator turns BLUE.\nPH level rises above 7.\nNaOH -> Na+ + OH-');
-              
-              // Animate the bottle tilting slightly to simulate pouring
               el.setAttribute('animation', 'property: rotation; to: 0 0 -30; dur: 300; dir: alternate; loop: 1');
             } else if (el.id === 'reset-button') {
-              // Action: Reset Experiment
-              liquid.setAttribute('material', 'color', '#e0e0e0'); // Reset liquid to neutral clear/grey
-              bubbles.setAttribute('visible', 'false'); // Hide bubbling particles
+              liquid.setAttribute('material', 'color', '#e0e0e0');
+              bubbles.setAttribute('visible', 'false');
               textPanel.setAttribute('value', 'Virtual Chemistry Lab\n\nTap the Acid or Base bottle\nto trigger the chemical reaction\nand observe the changes.');
             }
           });
         }
       });
     </script>
-  </head>
-  <body>
+
     <!-- The AR/VR Scene Configuration -->
     <a-scene embedded cursor="rayOrigin: mouse" raycaster="objects: .clickable">
       
@@ -54,37 +47,36 @@
       
       
 
-      <!-- Central Anchor Object (Moves all assets together for easy desk alignment) -->
+      <!-- Central Anchor Object -->
       
         
         <!-- Lab Table Surface -->
         <a-box position="0 0 0" width="3.5" height="0.1" depth="1.8" color="#d1d5db"></a-box>
         
-        <!-- 3D CENTRAL APPARATUS: Reality Realistic Erlenmeyer Flask Model -->
-        <!-- Glass Shell -->
+        <!-- Erlenmeyer Flask Model -->
         <a-cone id="flask-glass" position="0 0.35 0" radius-bottom="0.25" radius-top="0.08" height="0.6" color="#ffffff" material="opacity: 0.25; transparent: true; side: double"></a-cone>
         <a-cylinder id="flask-neck" position="0 0.65 0" radius="0.08" height="0.15" color="#ffffff" material="opacity: 0.25; transparent: true; side: double"></a-cylinder>
         
-        <!-- Liquid Mesh Inside Flask (The color-changing target) -->
+        <!-- Liquid Mesh Inside Flask -->
         <a-cone id="beaker-liquid" position="0 0.21 0" radius-bottom="0.24" radius-top="0.16" height="0.32" color="#e0e0e0" material="opacity: 0.85; transparent: false"></a-cone>
         
-        <!-- WOW Effect: Bubbling Chemical Particle Generator (Hidden by default) -->
+        <!-- Bubbling Chemical Particle Generator -->
         
         
 
-        <!-- 3D BOTTLE LEFT: Interactive Realistic Acid Dropper Bottle -->
+        <!-- Interactive Acid Dropper Bottle -->
         
-          <a-cylinder radius="0.1" height="0.4" color="#4b5563"></a-cylinder> <!-- Bottle Body -->
-          <a-cylinder radius="0.03" height="0.12" position="0 0.24 0" color="#ef4444"></a-cylinder> <!-- Red Cap Indicator -->
+          <a-cylinder radius="0.1" height="0.4" color="#4b5563"></a-cylinder>
+          <a-cylinder radius="0.03" height="0.12" position="0 0.24 0" color="#ef4444"></a-cylinder>
           <a-plane position="0 0 0.11" width="0.18" height="0.2" color="#ffffff">
             <a-text value="ACID\nHCl" color="#ef4444" align="center" width="1.5" position="0 0 0.01"></a-text>
           </a-plane>
         
 
-        <!-- 3D BOTTLE RIGHT: Interactive Realistic Base Dropper Bottle -->
+        <!-- Interactive Base Dropper Bottle -->
         
-          <a-cylinder radius="0.1" height="0.4" color="#4b5563"></a-cylinder> <!-- Bottle Body -->
-          <a-cylinder radius="0.03" height="0.12" position="0 0.24 0" color="#3b82f6"></a-cylinder> <!-- Blue Cap Indicator -->
+          <a-cylinder radius="0.1" height="0.4" color="#4b5563"></a-cylinder>
+          <a-cylinder radius="0.03" height="0.12" position="0 0.24 0" color="#3b82f6"></a-cylinder>
           <a-plane position="0 0 0.11" width="0.18" height="0.2" color="#ffffff">
             <a-text value="BASE\nNaOH" color="#3b82f6" align="center" width="1.5" position="0 0 0.01"></a-text>
           </a-plane>
@@ -93,16 +85,16 @@
         <!-- Dynamic Floating GUI Panel -->
         <a-plane position="0 1.2 -0.6" width="2.4" height="1.1" color="#1f2937" material="opacity: 0.95; roughness: 1">
           
-          <!-- STARTUP / SCHOOL BRANDING HEADER -->
+          <!-- BRANDING HEADER -->
           <a-plane position="0 0.44 0.01" width="2.4" height="0.2" color="#111827">
             <a-text value="NEXUS EDULABS | SMART SCIENCE" color="#38bdf8" font="kelsonsans" align="center" width="3.2" position="0 0 0.01"></a-text>
           </a-plane>
           
-          <!-- Core Educational Content Area -->
+          <!-- Lesson Text -->
           <a-text id="info-text" value="Virtual Chemistry Lab\n\nTap the Acid or Base bottle\nto trigger the chemical reaction\nand observe the changes." 
                   position="-1.1 -0.05 0.02" color="#ffffff" width="4.2"></a-text>
           
-          <!-- INTERACTIVE RESET BUTTON -->
+          <!-- RESET BUTTON -->
           <a-plane id="reset-button" class="clickable" chemical-interaction position="0 -0.4 0.02" width="0.6" height="0.15" color="#ef4444"
                    animation__hover="property: scale; to: 1.05 1.05 1.05; dur: 100; startEvents: mouseenter"
                    animation__leave="property: scale; to: 1 1 1; dur: 100; startEvents: mouseleave">
@@ -113,7 +105,7 @@
 
       
 
-      <!-- Default desktop navigation camera -->
+      <!-- Camera navigation -->
       <a-camera position="0 1.4 0">
         <a-cursor objects=".clickable" far="10" interval="1000"></a-cursor>
       </a-camera>
