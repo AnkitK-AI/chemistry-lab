@@ -1,92 +1,44 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Solar System Explorer – Edtech POC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AR Lesson – Solar System</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#05060f;--panel:rgba(20,24,52,.88);--text:#f1f3ff;--muted:#a9b0d8;--accent:#ffb703;--hl:#ffd166;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:"Trebuchet MS",system-ui,sans-serif;overflow:hidden}
-canvas{display:block;position:fixed;inset:0;touch-action:none}
-.top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;pointer-events:none}
-.top h1{font-size:17px;margin:0;pointer-events:auto}.top small{color:var(--muted);display:block;font-weight:normal}
-.btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;pointer-events:auto}
-button{background:var(--panel);color:var(--text);border:1px solid #3a4180;border-radius:20px;padding:7px 12px;font-size:13px;cursor:pointer}
-button:hover,button.on{background:var(--accent);color:#111}
-.panel{position:fixed;left:12px;bottom:70px;width:min(360px,calc(100% - 24px));background:var(--panel);border:1px solid #3a4180;border-radius:16px;padding:14px;backdrop-filter:blur(8px)}
-.panel h2{margin:0 0 6px;font-size:20px}.facts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.facts span{background:#232a63;border-radius:10px;padding:3px 8px;font-size:12px;color:var(--muted)}
-#txt{font-size:15px;line-height:1.55;max-height:26vh;overflow:auto}#txt span.hl{background:var(--hl);color:#111;border-radius:4px}
-.chips{position:fixed;bottom:env(safe-area-inset-bottom,0px);left:0;right:0;display:flex;gap:6px;overflow-x:auto;padding:10px 12px}
-.chips button{white-space:nowrap;flex:none}
-.speed{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-.hint{position:fixed;right:14px;bottom:70px;color:var(--muted);font-size:12px;text-align:right;max-width:200px}
-@media(max-width:640px){.hint{display:none}.panel{bottom:62px}}
+body{margin:0;background:#05060f;color:#f1f3ff;font-family:system-ui,sans-serif}
+model-viewer{width:100%;height:68vh;background:radial-gradient(#1b2150,#05060f)}
+.ar-btn{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:#ffb703;color:#111;border:0;border-radius:24px;padding:12px 22px;font-size:16px;font-weight:bold}
+.hs{background:#ffb703;color:#111;border:0;border-radius:12px;padding:4px 10px;font-size:12px}
+.bar{display:flex;gap:6px;overflow-x:auto;padding:10px}
+.bar button,.say{background:#14183a;color:#f1f3ff;border:1px solid #3a4180;border-radius:20px;padding:8px 14px;flex:none}
+.bar button.on{background:#ffb703;color:#111}
+.info{padding:0 14px 14px}.info h2{margin:4px 0}.info p{line-height:1.5}
 </style></head><body>
-<div class="top"><h1>🪐 Solar System Explorer<small>Class 6 · Science · Ch. 17 (demo)</small></h1>
-<div class="btns"><button id="bTop">Top view</button><button id="bSide">Side view</button><button id="bReset">Reset</button>
-<button id="bSnd" class="on">🔊 Sound</button><label class="speed">Speed <input id="spd" type="range" min="0" max="4" step=".1" value="1"></label></div></div>
-<div class="panel" id="panel"><h2 id="nm">Tap a planet!</h2><div class="facts" id="fc"></div>
-<div id="txt">Drag to rotate, scroll or pinch buttons to zoom, and tap any planet to hear its textbook story read aloud.</div>
-<div style="margin-top:8px"><button id="bTalk">▶ Narrate</button> <button id="bStop">■ Stop</button></div></div>
-<div class="hint">Phase 2: “View in AR” button<br>places this on your desk</div>
-<div class="chips" id="chips"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<model-viewer id="mv" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+  alt="3D model" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="auto"
+  camera-controls auto-rotate shadow-intensity="1" touch-action="pan-y" interaction-prompt="auto">
+  <button slot="ar-button" class="ar-btn">📱 View in your room (AR)</button>
+  <button slot="hotspot-1" class="hs" data-position="0 1.4 0.2" data-normal="0 1 0">Tap me!</button>
+</model-viewer>
+
+<div class="bar" id="bar"></div>
+<div class="info"><h2 id="nm"></h2><p id="tx"></p><button class="say" id="say">▶ Narrate</button></div>
+
 <script>
-const P=[
-{n:"Sun",r:3.2,d:0,s:0,c:0xffb703,f:["Star","5,500°C surface"],t:"The Sun is a star at the centre of our solar system. It gives us light and heat. All the planets move around the Sun in fixed paths called orbits."},
-{n:"Mercury",r:.45,d:6,s:4.1,c:0xb5a49a,f:["Smallest planet","88 days / year"],t:"Mercury is the planet closest to the Sun. It is the smallest planet and completes one orbit in just eighty eight days."},
-{n:"Venus",r:.9,d:8.5,s:1.6,c:0xe8c07a,f:["Hottest planet","225 days / year"],t:"Venus is the brightest planet in our night sky. Thick clouds trap heat, which makes it the hottest planet."},
-{n:"Earth",r:1,d:11.5,s:1,c:0x2f7fd8,f:["Our home","Has life"],t:"Earth is the only planet known to have life. It has air, water and the right temperature. Earth takes three hundred sixty five days to go around the Sun."},
-{n:"Mars",r:.6,d:14.5,s:.53,c:0xd1543a,f:["Red planet","2 moons"],t:"Mars is called the red planet because its soil contains iron oxide. It has two small moons named Phobos and Deimos."},
-{n:"Jupiter",r:2.3,d:19.5,s:.084,c:0xd9a066,f:["Largest planet","79 moons"],t:"Jupiter is the largest planet in the solar system. Its Great Red Spot is a giant storm that has lasted for hundreds of years."},
-{n:"Saturn",r:1.9,d:25,s:.034,c:0xe3cf8f,f:["Has rings","146 moons"],t:"Saturn is famous for its beautiful rings made of ice and rock. It is so light that it could float on water."},
-{n:"Uranus",r:1.3,d:30,s:.012,c:0x7fd6e0,f:["Ice giant","Spins on its side"],t:"Uranus is an ice giant that spins on its side. It takes eighty four years to orbit the Sun."},
-{n:"Neptune",r:1.25,d:34.5,s:.006,c:0x3f5fe0,f:["Windiest planet","165 years / year"],t:"Neptune is the farthest planet from the Sun. It is cold, dark and has the fastest winds in the solar system."}];
-const R=new THREE.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);document.body.prepend(R.domElement);
-const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,1000);
-S.add(new THREE.AmbientLight(0x667799,.7));const L=new THREE.PointLight(0xfff2cc,2.2,200);S.add(L);
-// stars
-const sg=new THREE.BufferGeometry(),sp=[];for(let i=0;i<1500;i++){const v=new THREE.Vector3().randomDirection?0:0;const a=Math.random()*6.28,b=Math.acos(2*Math.random()-1),r=150+Math.random()*100;sp.push(r*Math.sin(b)*Math.cos(a),r*Math.cos(b),r*Math.sin(b)*Math.sin(a))}
-sg.setAttribute("position",new THREE.Float32BufferAttribute(sp,3));S.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:.7})));
-const bodies=[];
-P.forEach((p,i)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(p.r,40,28),i?new THREE.MeshStandardMaterial({color:p.c,roughness:.8}):new THREE.MeshBasicMaterial({color:p.c}));
- const g=new THREE.Group();g.add(m);m.userData.i=i;S.add(g);p.g=g;p.m=m;p.a=Math.random()*6.28;
- if(i){const o=new THREE.Mesh(new THREE.RingGeometry(p.d-.03,p.d+.03,128),new THREE.MeshBasicMaterial({color:0x3a4180,side:2,transparent:true,opacity:.6}));o.rotation.x=-Math.PI/2;S.add(o)}
- if(p.n=="Saturn"){const rg=new THREE.Mesh(new THREE.RingGeometry(2.5,4,64),new THREE.MeshBasicMaterial({color:0xcdb87a,side:2,transparent:true,opacity:.7}));rg.rotation.x=1.2;m.add(rg)}
- if(p.n=="Earth"){const mo=new THREE.Mesh(new THREE.SphereGeometry(.25,16,12),new THREE.MeshStandardMaterial({color:0xcccccc}));g.add(mo);p.moon=mo}
- const b=document.createElement("button");b.textContent=p.n;b.onclick=()=>pick(i);document.getElementById("chips").append(b);p.btn=b});
-// camera control
-let th=.6,ph=1.1,rad=45,wantR=45,tgt=new THREE.Vector3(),sel=-1;
-const el=R.domElement;let drag=false,lx=0,ly=0,pts={},pd=0;
-el.onpointerdown=e=>{pts[e.pointerId]=e;drag=true;lx=e.clientX;ly=e.clientY;el.dx=e.clientX;el.dy=e.clientY};
-el.onpointermove=e=>{pts[e.pointerId]=e;const k=Object.values(pts);if(k.length==2){const d=Math.hypot(k[0].clientX-k[1].clientX,k[0].clientY-k[1].clientY);if(pd)wantR=clamp(wantR*(pd/d),4,90);pd=d;return}
- if(!drag)return;th-=(e.clientX-lx)*.006;ph=clamp(ph-(e.clientY-ly)*.006,.15,2.9);lx=e.clientX;ly=e.clientY};
-el.onpointerup=e=>{delete pts[e.pointerId];pd=0;drag=false;if(Math.hypot(e.clientX-el.dx,e.clientY-el.dy)<5)click(e)};
-el.onwheel=e=>{wantR=clamp(wantR*(1+e.deltaY*.001),4,90)};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const ray=new THREE.Raycaster(),mv=new THREE.Vector2();
-function click(e){mv.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mv,C);const h=ray.intersectObjects(P.map(p=>p.m))[0];if(h)pick(h.object.userData.i)}
-// audio
-let snd=true,ac;const A=()=>ac||(ac=new (window.AudioContext||window.webkitAudioContext)());
-function beep(f1,f2,t){if(!snd)return;try{const a=A(),o=a.createOscillator(),g=a.createGain();o.frequency.setValueAtTime(f1,a.currentTime);o.frequency.exponentialRampToValueAtTime(f2,a.currentTime+t);g.gain.setValueAtTime(.15,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+t)}catch(e){}}
-// narration
-let words=[],u;
-function pick(i){sel=i;const p=P[i];wantR=p.r*4+6;beep(300,900,.35);
- document.getElementById("nm").textContent=p.n;document.getElementById("fc").innerHTML=p.f.map(x=>`<span>${x}</span>`).join("");
- words=p.t.split(" ");document.getElementById("txt").innerHTML=words.map((w,k)=>`<span id="w${k}">${w}</span>`).join(" ");
- P.forEach((q,k)=>q.btn.classList.toggle("on",k==i));talk()}
-function talk(){speechSynthesis.cancel();if(sel<0)return;const t=words.join(" ");u=new SpeechSynthesisUtterance(t);u.rate=.9;
- const off=[];let c=0;words.forEach(w=>{off.push(c);c+=w.length+1});
- u.onboundary=e=>{let k=off.filter(o=>o<=e.charIndex).length-1;document.querySelectorAll(".hl").forEach(x=>x.classList.remove("hl"));const s=document.getElementById("w"+k);if(s)s.classList.add("hl")};
- u.onend=()=>document.querySelectorAll(".hl").forEach(x=>x.classList.remove("hl"));speechSynthesis.speak(u)}
-bTalk.onclick=talk;bStop.onclick=()=>speechSynthesis.cancel();
-bTop.onclick=()=>{ph=.15;beep(200,500,.2)};bSide.onclick=()=>{ph=Math.PI/2;beep(500,200,.2)};
-bReset.onclick=()=>{sel=-1;wantR=45;th=.6;ph=1.1;speechSynthesis.cancel();P.forEach(q=>q.btn.classList.remove("on"));nm.textContent="Tap a planet!";fc.innerHTML="";txt.textContent="Drag to rotate, use the mouse wheel or pinch to zoom, and tap any planet to hear its textbook story read aloud."};
-bSnd.onclick=()=>{snd=!snd;bSnd.classList.toggle("on",snd);bSnd.textContent=snd?"🔊 Sound":"🔇 Muted"};
-// loop
-const clk=new THREE.Clock();
-(function loop(){requestAnimationFrame(loop);const dt=clk.getDelta(),sp=+spd.value;
- P.forEach((p,i)=>{if(i){p.a+=dt*p.s*.5*sp;p.g.position.set(Math.cos(p.a)*p.d,0,Math.sin(p.a)*p.d)}p.m.rotation.y+=dt*.5*sp;if(p.moon)p.moon.position.set(Math.cos(p.a*12)*1.8,0,Math.sin(p.a*12)*1.8)});
- const f=sel>=0?P[sel].g.position:new THREE.Vector3();tgt.lerp(f,.08);rad+=(wantR-rad)*.08;
- C.position.set(tgt.x+rad*Math.sin(ph)*Math.cos(th),tgt.y+rad*Math.cos(ph),tgt.z+rad*Math.sin(ph)*Math.sin(th));C.lookAt(tgt);R.render(S,C)})();
-onresize=()=>{R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()};
+// Replace "src" with your own .glb files (put them in a /models folder next to this page)
+const LESSON=[
+ {n:"Earth",src:"https://modelviewer.dev/shared-assets/models/Astronaut.glb",t:"Earth is the only planet known to have life. It has air, water and the right temperature."},
+ {n:"Mars",src:"https://modelviewer.dev/shared-assets/models/Astronaut.glb",t:"Mars is called the red planet because its soil contains iron oxide. It has two small moons."},
+ {n:"Saturn",src:"https://modelviewer.dev/shared-assets/models/Astronaut.glb",t:"Saturn is famous for its rings made of ice and rock."}
+];
+const mv=document.getElementById("mv"),bar=document.getElementById("bar");
+function show(i){const p=LESSON[i];mv.src=p.src;nm.textContent=p.n;tx.textContent=p.t;
+ [...bar.children].forEach((b,k)=>b.classList.toggle("on",k==i));cur=i;speak()}
+let cur=0;
+function speak(){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(LESSON[cur].t);u.rate=.9;speechSynthesis.speak(u)}
+LESSON.forEach((p,i)=>{const b=document.createElement("button");b.textContent=p.n;b.onclick=()=>show(i);bar.append(b)});
+say.onclick=speak;
+// Support links like ar.html?p=1 (from QR code or main page)
+const q=+new URLSearchParams(location.search).get("p")||0;
+nm.textContent=LESSON[q].n;tx.textContent=LESSON[q].t;cur=q;mv.src=LESSON[q].src;bar.children[q].classList.add("on");
 </script></body></html>
