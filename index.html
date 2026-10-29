@@ -4,13 +4,12 @@
     <meta charset="utf-8">
     <title>EdTech AR Startup - Chemistry Lab Sample</title>
     <meta name="description" content="Interactive AR Chemistry Lesson">
-    <!-- 1. Load A-Frame Engine First -->
+    
+    <!-- 1. First, download the core libraries from the internet -->
     <script src="https://aframe.io"></script>
-    <!-- 2. Load Particle System Second -->
     <script src="https://unpkg.com"></script>
-  </head>
-  <body>
-    <!-- 3. Your interaction logic runs safely here after libraries are defined -->
+
+    <!-- 2. Next, immediately register the behavior while A-Frame is fresh in memory -->
     <script>
       AFRAME.registerComponent('chemical-interaction', {
         init: function () {
@@ -39,8 +38,9 @@
         }
       });
     </script>
-
-    <!-- The AR/VR Scene Configuration -->
+  </head>
+  <body>
+    <!-- 3. Finally, render the scene elements that use the registered behaviors -->
     <a-scene embedded cursor="rayOrigin: mouse" raycaster="objects: .clickable">
       
       <!-- Lighting -->
